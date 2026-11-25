@@ -19,7 +19,7 @@ public sealed class SmsIrPhoneVerificationSender(
             })
         };
         request.Headers.Add("X-API-KEY", _options.ApiKey);
-        request.Headers.Accept.ParseAdd("application/json");
+        request.Headers.Accept.ParseAdd("text/plain");
         using var response = await httpClient.SendAsync(request, HttpCompletionOption.ResponseHeadersRead, cancellationToken);
         var payload = await response.Content.ReadAsStringAsync(cancellationToken);
         response.EnsureSuccessStatusCode();
