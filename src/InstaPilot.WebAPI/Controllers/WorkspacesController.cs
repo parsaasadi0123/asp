@@ -96,6 +96,26 @@ public sealed class WorkspacesController(
         return NoContent();
     }
 
+    [HttpPost("{workspaceId:guid}/transfer-ownership")]
+    public async Task<IActionResult> TransferOwnership(Guid workspaceId, TransferWorkspaceOwnershipRequest request, CancellationToken cancellationToken)
+    {
+        var actor = await GetMembershipAsync(workspaceId, cancellationToken);
+        if (actor is null) return NotFound();
+        if (actor.Role != WorkspaceRole.Owner) return Forbid();
+        if (request.NewOwnerUserId == actor.UserId) return BadRequest(new { message = "The new owner must be another workspace member." });
+
+        var newOwner = await db.WorkspaceMemberships.SingleOrDefaultAsync(
+            x => x.WorkspaceId == workspaceId && x.UserId == request.NewOwnerUserId, cancellationToken);
+        if (newOwner is null) return NotFound(new { message = "The new owner must already be a workspace member." });
+
+        await using var transaction = await db.Database.BeginTransactionAsync(cancellationToken);
+        newOwner.ChangeRole(WorkspaceRole.Owner);
+        actor.RelinquishOwnership();
+        await db.SaveChangesAsync(cancellationToken);
+        await transaction.CommitAsync(cancellationToken);
+        return NoContent();
+    }
+
     [HttpDelete("{workspaceId:guid}/members/{userId:guid}")]
     public async Task<IActionResult> RemoveMember(Guid workspaceId, Guid userId, CancellationToken cancellationToken)
     {
