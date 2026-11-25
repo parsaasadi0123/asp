@@ -24,7 +24,7 @@ public sealed class AuthController(
     {
         var phone = NormalizePhone(request.PhoneNumber);
         if (string.IsNullOrWhiteSpace(request.DisplayName) || request.DisplayName.Trim().Length > 100)
-            return ValidationProblem("Display name is required and must be at most 100 characters.");
+            return BadRequest(new { message = "Display name is required and must be at most 100 characters." });
         if (phone.Length is < 8 or > 16 || phone.Any(c => !char.IsAsciiDigit(c) && c != '+'))
             return BadRequest(new { message = "Phone number format is invalid." });
         var user = new ApplicationUser { Id = Guid.NewGuid(), UserName = phone, PhoneNumber = phone, DisplayName = request.DisplayName.Trim() };
