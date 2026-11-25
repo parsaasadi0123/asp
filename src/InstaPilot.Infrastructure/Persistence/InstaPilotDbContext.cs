@@ -18,6 +18,8 @@ public sealed class InstaPilotDbContext(DbContextOptions<InstaPilotDbContext> op
     {
         base.OnModelCreating(builder);
         builder.ApplyConfigurationsFromAssembly(typeof(InstaPilotDbContext).Assembly);
+        if (Database.ProviderName == "Microsoft.EntityFrameworkCore.Sqlite")
+            builder.Entity<RefreshToken>().Property(x => x.RowVersion).ValueGeneratedNever().IsConcurrencyToken();
     }
 
     public override Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
