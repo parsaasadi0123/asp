@@ -128,6 +128,7 @@ public sealed class InitialIdentityWorkspace : Migration
             );
             CREATE UNIQUE INDEX [IX_RefreshTokens_TokenHash] ON [RefreshTokens] ([TokenHash]);
             CREATE INDEX [IX_RefreshTokens_UserId_ExpiresAtUtc] ON [RefreshTokens] ([UserId], [ExpiresAtUtc]);
+            CREATE INDEX [IX_RefreshTokens_FamilyId_RevokedAtUtc] ON [RefreshTokens] ([FamilyId], [RevokedAtUtc]);
             """);
     }
 
