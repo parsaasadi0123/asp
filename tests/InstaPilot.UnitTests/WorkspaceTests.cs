@@ -39,4 +39,19 @@ public sealed class WorkspaceTests
         membership.ChangeRole(WorkspaceRole.Analyst);
         Assert.Equal(WorkspaceRole.Analyst, membership.Role);
     }
+    [Fact]
+    public void RelinquishOwnership_TransfersCurrentOwnerToAdmin()
+    {
+        var membership = new WorkspaceMembership(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), WorkspaceRole.Owner);
+        membership.RelinquishOwnership();
+        Assert.Equal(WorkspaceRole.Admin, membership.Role);
+    }
+
+    [Fact]
+    public void NonOwnerCannotRelinquishOwnership()
+    {
+        var membership = new WorkspaceMembership(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), WorkspaceRole.Editor);
+        Assert.Throws<InvalidOperationException>(() => membership.RelinquishOwnership());
+    }
+
 }
