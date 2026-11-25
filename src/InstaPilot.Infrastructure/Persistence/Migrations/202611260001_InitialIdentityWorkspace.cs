@@ -35,7 +35,7 @@ public sealed class InitialIdentityWorkspace : Migration
                 [LockoutEnd] datetimeoffset NULL,
                 [LockoutEnabled] bit NOT NULL,
                 [AccessFailedCount] int NOT NULL,
-                [DisplayName] nvarchar(100) NOT NULL,
+                [DisplayName] nvarchar(max) NOT NULL,
                 [CreatedAtUtc] datetime2 NOT NULL,
                 [IsActive] bit NOT NULL
             );
