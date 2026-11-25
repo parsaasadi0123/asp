@@ -1,4 +1,7 @@
 name: CI
+concurrency:
+  group: instapilot-ci-${{ github.ref }}
+  cancel-in-progress: true
 on:
   push:
     branches: [ main, phase-1-foundation ]
