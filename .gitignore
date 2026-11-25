@@ -1,0 +1,19 @@
+# .NET
+**/bin/
+**/obj/
+.vs/
+*.user
+# Node
+node_modules/
+.next/
+dist/
+coverage/
+# Secrets
+.env
+.env.*
+!.env.example
+appsettings.*.Local.json
+# Generated
+*.log
+media/
+renders/
