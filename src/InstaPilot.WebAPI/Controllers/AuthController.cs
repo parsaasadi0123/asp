@@ -65,7 +65,17 @@ public sealed class AuthController(
         var hash = TokenService.HashToken(request.RefreshToken);
         var stored = await db.RefreshTokens.SingleOrDefaultAsync(x => x.TokenHash == hash, cancellationToken);
         var now = DateTime.UtcNow;
-        if (stored is null || !stored.IsActive(now)) return Unauthorized();
+        if (stored is null) return Unauthorized();
+        if (!stored.IsActive(now))
+        {
+            if (stored.RevokedAtUtc is not null)
+            {
+                await db.RefreshTokens
+                    .Where(x => x.FamilyId == stored.FamilyId && x.RevokedAtUtc == null)
+                    .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.RevokedAtUtc, now), cancellationToken);
+            }
+            return Unauthorized();
+        }
         var user = await userManager.FindByIdAsync(stored.UserId.ToString());
         if (user is null || !user.IsActive || !user.PhoneNumberConfirmed) return Unauthorized();
 
@@ -73,13 +83,23 @@ public sealed class AuthController(
         stored.RevokedAtUtc = now;
         var replacement = new RefreshToken
         {
-            Id = Guid.NewGuid(), UserId = user.Id, TokenHash = TokenService.HashToken(pair.RefreshToken),
+            Id = Guid.NewGuid(), UserId = user.Id, FamilyId = stored.FamilyId, TokenHash = TokenService.HashToken(pair.RefreshToken),
             CreatedAtUtc = now, ExpiresAtUtc = pair.RefreshTokenExpiresAtUtc,
             CreatedByIp = HttpContext.Connection.RemoteIpAddress?.ToString()
         };
         stored.ReplacedByTokenId = replacement.Id;
         db.RefreshTokens.Add(replacement);
-        await db.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await db.SaveChangesAsync(cancellationToken);
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            await db.RefreshTokens
+                .Where(x => x.FamilyId == stored.FamilyId && x.RevokedAtUtc == null)
+                .ExecuteUpdateAsync(setters => setters.SetProperty(x => x.RevokedAtUtc, now), cancellationToken);
+            return Unauthorized();
+        }
         return Ok(new AuthResponse(pair.AccessToken, pair.RefreshToken, pair.AccessTokenExpiresAtUtc, pair.RefreshTokenExpiresAtUtc));
     }
 
@@ -101,7 +121,7 @@ public sealed class AuthController(
         var pair = tokenService.Create(user.Id, user.PhoneNumber!, user.DisplayName);
         db.RefreshTokens.Add(new RefreshToken
         {
-            Id = Guid.NewGuid(), UserId = user.Id, TokenHash = TokenService.HashToken(pair.RefreshToken),
+            Id = Guid.NewGuid(), UserId = user.Id, FamilyId = Guid.NewGuid(), TokenHash = TokenService.HashToken(pair.RefreshToken),
             CreatedAtUtc = DateTime.UtcNow, ExpiresAtUtc = pair.RefreshTokenExpiresAtUtc,
             CreatedByIp = HttpContext.Connection.RemoteIpAddress?.ToString()
         });
