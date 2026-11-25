@@ -1,10 +1,10 @@
 name: CI
 concurrency:
-  group: instapilot-ci-${{ github.ref }}
+  group: instapilot-ci-${{ github.head_ref || github.ref }}
   cancel-in-progress: true
 on:
   push:
-    branches: [ main, phase-1-foundation ]
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 jobs:
