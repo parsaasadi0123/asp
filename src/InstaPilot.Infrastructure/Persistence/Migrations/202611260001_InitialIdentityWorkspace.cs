@@ -116,6 +116,7 @@ public sealed class InitialIdentityWorkspace : Migration
             CREATE TABLE [RefreshTokens] (
                 [Id] uniqueidentifier NOT NULL CONSTRAINT [PK_RefreshTokens] PRIMARY KEY,
                 [UserId] uniqueidentifier NOT NULL,
+                [FamilyId] uniqueidentifier NOT NULL,
                 [TokenHash] nvarchar(64) NOT NULL,
                 [CreatedAtUtc] datetime2 NOT NULL,
                 [ExpiresAtUtc] datetime2 NOT NULL,
