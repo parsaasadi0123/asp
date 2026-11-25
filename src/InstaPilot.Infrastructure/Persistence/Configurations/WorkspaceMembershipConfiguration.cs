@@ -11,6 +11,7 @@ public sealed class WorkspaceMembershipConfiguration : IEntityTypeConfiguration<
         builder.HasIndex(x => new { x.WorkspaceId, x.UserId }).IsUnique();
         builder.HasIndex(x => x.UserId);
         builder.HasOne<Workspace>().WithMany().HasForeignKey(x => x.WorkspaceId).OnDelete(DeleteBehavior.Restrict);
+        builder.HasOne<InstaPilot.Infrastructure.Identity.ApplicationUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
         builder.HasQueryFilter(x => !x.IsDeleted);
     }
 }
