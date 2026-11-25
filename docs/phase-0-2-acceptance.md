@@ -36,7 +36,7 @@ not considered complete until the corresponding test or operational evidence is 
 - [ ] Integration test passes against the CI test host.
 - [ ] SMS.ir Sandbox delivery is verified using the account's sandbox key and approved template.
 - [ ] SMS.ir Production delivery is verified after the customer supplies production credentials.
-- [ ] Refresh-token replay/family revocation policy is implemented and tested.
+- [x] Refresh-token replay/family revocation policy is implemented and covered by the API integration flow test.
 - [ ] Authorization matrix is reviewed by role, including all workspace-scoped resources.
 - [ ] Rate limits are validated behind the actual reverse proxy / IIS deployment.
 
