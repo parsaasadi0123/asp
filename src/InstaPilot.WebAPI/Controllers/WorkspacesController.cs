@@ -57,6 +57,8 @@ public sealed class WorkspacesController(
         var phone = request.PhoneNumber.Trim().Replace(" ", string.Empty).Replace("-", string.Empty);
         var user = await userManager.FindByNameAsync(phone);
         if (user is null) return NotFound(new { message = "User must register before being added." });
+        if (!user.IsActive || !user.PhoneNumberConfirmed)
+            return BadRequest(new { message = "User must verify their phone number before being added." });
         var exists = await db.WorkspaceMemberships.AnyAsync(x => x.WorkspaceId == workspaceId && x.UserId == user.Id, cancellationToken);
         if (exists) return Conflict(new { message = "User is already a workspace member." });
         db.WorkspaceMemberships.Add(new WorkspaceMembership(Guid.NewGuid(), workspaceId, user.Id, (WorkspaceRole)request.Role));
