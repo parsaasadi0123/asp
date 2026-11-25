@@ -1,0 +1,35 @@
+name: CI
+on:
+  push:
+    branches: [ main, phase-1-foundation ]
+  pull_request:
+    branches: [ main ]
+jobs:
+  backend:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+      - name: Restore
+        run: dotnet restore InstaPilot.slnx
+      - name: Build
+        run: dotnet build InstaPilot.slnx --configuration Release --no-restore
+      - name: Test
+        run: dotnet test InstaPilot.slnx --configuration Release --no-build
+  frontend:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: frontend/instapilot-web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: frontend/instapilot-web/package-lock.json
+      - run: npm install
+      - run: npm run typecheck
+      - run: npm run build
