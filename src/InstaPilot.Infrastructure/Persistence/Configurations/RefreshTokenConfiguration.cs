@@ -14,6 +14,7 @@ public sealed class RefreshTokenConfiguration : IEntityTypeConfiguration<Refresh
         builder.HasIndex(x => x.TokenHash).IsUnique();
         builder.HasIndex(x => new { x.UserId, x.ExpiresAtUtc });
         builder.Property(x => x.CreatedByIp).HasMaxLength(64);
+        builder.Property(x => x.RowVersion).IsRowVersion();
         builder.HasOne<ApplicationUser>().WithMany().HasForeignKey(x => x.UserId).OnDelete(DeleteBehavior.Cascade);
     }
 }

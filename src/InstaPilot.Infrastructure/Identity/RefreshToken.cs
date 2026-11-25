@@ -10,5 +10,6 @@ public sealed class RefreshToken
     public DateTime? RevokedAtUtc { get; set; }
     public Guid? ReplacedByTokenId { get; set; }
     public string? CreatedByIp { get; set; }
+    public byte[] RowVersion { get; set; } = [];
     public bool IsActive(DateTime utcNow) => RevokedAtUtc is null && ExpiresAtUtc > utcNow;
 }

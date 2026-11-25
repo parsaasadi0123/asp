@@ -52,8 +52,10 @@ public sealed class WorkspacesController(
         if (access.Role is not (WorkspaceRole.Owner or WorkspaceRole.Admin)) return Forbid();
         if (!Enum.IsDefined(typeof(WorkspaceRole), request.Role) || request.Role == (int)WorkspaceRole.Owner)
             return BadRequest(new { message = "Invalid member role." });
+        if (access.Role != WorkspaceRole.Owner && request.Role == (int)WorkspaceRole.Admin) return Forbid();
 
-        var user = await userManager.FindByNameAsync(request.PhoneNumber.Trim().Replace(" ", string.Empty).Replace("-", string.Empty));
+        var phone = request.PhoneNumber.Trim().Replace(" ", string.Empty).Replace("-", string.Empty);
+        var user = await userManager.FindByNameAsync(phone);
         if (user is null) return NotFound(new { message = "User must register before being added." });
         var exists = await db.WorkspaceMemberships.AnyAsync(x => x.WorkspaceId == workspaceId && x.UserId == user.Id, cancellationToken);
         if (exists) return Conflict(new { message = "User is already a workspace member." });
@@ -83,6 +85,8 @@ public sealed class WorkspacesController(
         if (actor.Role is not (WorkspaceRole.Owner or WorkspaceRole.Admin)) return Forbid();
         if (!Enum.IsDefined(typeof(WorkspaceRole), request.Role) || request.Role == (int)WorkspaceRole.Owner)
             return BadRequest(new { message = "Invalid member role." });
+        if (actor.Role != WorkspaceRole.Owner && request.Role == (int)WorkspaceRole.Admin) return Forbid();
+
         var target = await db.WorkspaceMemberships.SingleOrDefaultAsync(x => x.WorkspaceId == workspaceId && x.UserId == userId, cancellationToken);
         if (target is null) return NotFound();
         if (target.Role == WorkspaceRole.Owner) return Conflict(new { message = "Transfer ownership before changing the owner's role." });
@@ -102,7 +106,6 @@ public sealed class WorkspacesController(
         if (target.Role == WorkspaceRole.Owner) return Conflict(new { message = "Transfer ownership before removing the owner." });
         if (actor.Role != WorkspaceRole.Owner && actor.Role != WorkspaceRole.Admin) return Forbid();
         if (actor.Role == WorkspaceRole.Admin && target.Role == WorkspaceRole.Admin) return Forbid();
-        if (actor.UserId != userId && actor.Role != WorkspaceRole.Owner && target.Role == WorkspaceRole.Owner) return Forbid();
         db.WorkspaceMemberships.Remove(target);
         await db.SaveChangesAsync(cancellationToken);
         return NoContent();

@@ -1,6 +1,8 @@
 using InstaPilot.Domain.Workspaces;
 using Xunit;
+
 namespace InstaPilot.UnitTests;
+
 public sealed class WorkspaceTests
 {
     [Fact]
@@ -10,9 +12,31 @@ public sealed class WorkspaceTests
         Assert.Equal("My Brand", workspace.Name);
         Assert.Equal("my-brand", workspace.Slug);
     }
+
     [Fact]
     public void Constructor_RejectsInvalidSlug()
     {
         Assert.Throws<ArgumentException>(() => new Workspace(Guid.NewGuid(), "Brand", "invalid slug", Guid.NewGuid()));
+    }
+
+    [Fact]
+    public void Constructor_RejectsEmptyOwnerId()
+    {
+        Assert.Throws<ArgumentException>(() => new Workspace(Guid.NewGuid(), "Brand", "brand", Guid.Empty));
+    }
+
+    [Fact]
+    public void OwnerCannotBeDemotedWithoutOwnershipTransfer()
+    {
+        var membership = new WorkspaceMembership(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), WorkspaceRole.Owner);
+        Assert.Throws<InvalidOperationException>(() => membership.ChangeRole(WorkspaceRole.Admin));
+    }
+
+    [Fact]
+    public void NonOwnerMembershipCanChangeRole()
+    {
+        var membership = new WorkspaceMembership(Guid.NewGuid(), Guid.NewGuid(), Guid.NewGuid(), WorkspaceRole.Editor);
+        membership.ChangeRole(WorkspaceRole.Analyst);
+        Assert.Equal(WorkspaceRole.Analyst, membership.Role);
     }
 }
