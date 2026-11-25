@@ -16,7 +16,24 @@ builder.Host.UseSerilog((context, config) => config.ReadFrom.Configuration(conte
 
 builder.Services.AddApplication();
 builder.Services.AddInfrastructure(builder.Configuration);
-builder.Services.AddScoped<IPhoneVerificationSender, DevelopmentPhoneVerificationSender>();
+if (builder.Environment.IsDevelopment() || builder.Environment.IsEnvironment("Testing"))
+{
+    builder.Services.AddScoped<IPhoneVerificationSender, DevelopmentPhoneVerificationSender>();
+}
+else
+{
+    builder.Services.AddOptions<SmsIrOptions>()
+        .Bind(builder.Configuration.GetSection(SmsIrOptions.SectionName))
+        .Validate(options => !string.IsNullOrWhiteSpace(options.ApiKey), "SmsIr:ApiKey is required outside Development.")
+        .Validate(options => options.TemplateId > 0, "SmsIr:TemplateId must be a positive integer.")
+        .Validate(options => !string.IsNullOrWhiteSpace(options.CodeParameterName), "SmsIr:CodeParameterName is required.")
+        .ValidateOnStart();
+    builder.Services.AddHttpClient<IPhoneVerificationSender, SmsIrPhoneVerificationSender>(client =>
+    {
+        client.BaseAddress = new Uri("https://api.sms.ir/");
+        client.Timeout = TimeSpan.FromSeconds(15);
+    });
+}
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
