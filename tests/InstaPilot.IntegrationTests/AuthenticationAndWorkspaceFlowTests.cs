@@ -101,6 +101,10 @@ public sealed class AuthenticationAndWorkspaceFlowTests(ApiFactory factory) : IC
         Assert.Equal(HttpStatusCode.OK, refresh.StatusCode);
         var refreshed = (await refresh.Content.ReadFromJsonAsync<TokenResult>())!;
         Assert.NotEqual(ownerTokens.RefreshToken, refreshed.RefreshToken);
+        var replayAttempt = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = ownerTokens.RefreshToken });
+        Assert.Equal(HttpStatusCode.Unauthorized, replayAttempt.StatusCode);
+        var revokedReplacement = await client.PostAsJsonAsync("/api/v1/auth/refresh", new { refreshToken = refreshed.RefreshToken });
+        Assert.Equal(HttpStatusCode.Unauthorized, revokedReplacement.StatusCode);
 
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", refreshed.AccessToken);
         var createWorkspace = await client.PostAsJsonAsync("/api/v1/workspaces",
