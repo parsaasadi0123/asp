@@ -15,7 +15,7 @@ dotnet ef database update --project src/InstaPilot.Infrastructure --startup-proj
 ```
 
 The design-time factory reads `ConnectionStrings__DefaultConnection`. The migration
-is SQL Server-specific (including the SQL Server `rowversion` column).
+is SQL Server-specific (including the SQL Server `rowversion` column). The initial migration is explicit SQL; an EF Core model snapshot has not yet been scaffolded. Before adding future model-driven migrations with `dotnet ef migrations add`, generate and commit a matching `InstaPilotDbContextModelSnapshot`.
 
 Before applying to an existing database, take a backup and verify that the database
 is empty or that its schema is compatible. Production deployments should run reviewed
