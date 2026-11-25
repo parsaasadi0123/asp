@@ -18,6 +18,7 @@ not considered complete until the corresponding test or operational evidence is 
 - [x] Serilog, exception handling, health endpoints, CORS, and JWT validation are configured.
 - [x] CI workflow covers backend restore/build/test and frontend install/typecheck/build.
 - [x] Initial SQL Server migration source is present.
+- [ ] EF Core model snapshot is generated and checked in for future migration diffs.
 - [ ] CI succeeds on the latest branch head (Restore, Build, Unit Tests, Integration Tests, Frontend).
 - [ ] Initial migration is applied successfully to a provisioned SQL Server database.
 - [ ] Production secrets are loaded from the target secret store and verified without exposing values.
