@@ -48,7 +48,7 @@ public sealed class MetaOAuthController(
                   $"&redirect_uri={Uri.EscapeDataString(_options.RedirectUri)}" +
                   $"&state={Uri.EscapeDataString(stateId.ToString("N"))}" +
                   $"&scope={Uri.EscapeDataString(scopes)}&response_type=code";
-        return Redirect(url);
+        return Ok(new { authorizationUrl = url });
     }
 
     [AllowAnonymous]
