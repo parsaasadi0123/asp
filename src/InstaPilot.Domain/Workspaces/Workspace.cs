@@ -8,7 +8,11 @@ public sealed class Workspace : Entity<Guid>
     private Workspace() { }
     public Workspace(Guid id, string name, string slug, Guid createdByUserId) : base(id)
     {
-        Rename(name); Slug = NormalizeSlug(slug); CreatedByUserId = createdByUserId;
+        if (createdByUserId == Guid.Empty)
+            throw new ArgumentException("Workspace owner ID cannot be empty.", nameof(createdByUserId));
+        Rename(name);
+        Slug = NormalizeSlug(slug);
+        CreatedByUserId = createdByUserId;
     }
     public void Rename(string name)
     {
