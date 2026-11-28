@@ -19,7 +19,7 @@ not considered complete until the corresponding test or operational evidence is 
 - [x] CI workflow covers backend restore/build/test and frontend install/typecheck/build.
 - [x] Initial SQL Server migration source is present.
 - [ ] EF Core model snapshot is generated and checked in for future migration diffs.
-- [ ] CI succeeds on the latest branch head (Restore, Build, Unit Tests, Integration Tests, Frontend).
+- [x] CI succeeds on branch head `e5612188634ff88d1912e0e21c88179662df2541` (Restore, Build, Unit Tests, Integration Tests, Frontend; run 46126383863).
 - [ ] Initial migration is applied successfully to a provisioned SQL Server database.
 - [ ] Production secrets are loaded from the target secret store and verified without exposing values.
 - [ ] Production deployment and rollback rehearsal completed.
@@ -34,7 +34,7 @@ not considered complete until the corresponding test or operational evidence is 
 - [x] Owner transfer is transactional and the owner cannot be removed or demoted directly.
 - [x] Production SMS.ir Verify adapter is implemented with configurable API key and approved template.
 - [x] API integration test covers registration, verification, login, refresh rotation, member access, and non-member isolation.
-- [ ] Integration test passes against the CI test host.
+- [x] Integration test passes against the CI test host (run 46126383863).
 - [ ] SMS.ir Sandbox delivery is verified using the account's sandbox key and approved template.
 - [ ] SMS.ir Production delivery is verified after the customer supplies production credentials.
 - [x] Refresh-token replay/family revocation policy is implemented and covered by the API integration flow test.
