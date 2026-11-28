@@ -1,0 +1,11 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/InstaPilot.Domain/InstaPilot.Domain.csproj" />
+    <Project Path="src/InstaPilot.Application/InstaPilot.Application.csproj" />
+    <Project Path="src/InstaPilot.Contracts/InstaPilot.Contracts.csproj" />
+    <Project Path="src/InstaPilot.Infrastructure/InstaPilot.Infrastructure.csproj" />
+    <Project Path="src/InstaPilot.WebAPI/InstaPilot.WebAPI.csproj" />
+    <Project Path="src/InstaPilot.Worker/InstaPilot.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/"><Project Path="tests/InstaPilot.UnitTests/InstaPilot.UnitTests.csproj" /><Project Path="tests/InstaPilot.IntegrationTests/InstaPilot.IntegrationTests.csproj" /><Project Path="tests/InstaPilot.ArchitectureTests/InstaPilot.ArchitectureTests.csproj" /></Folder>
+</Solution>
