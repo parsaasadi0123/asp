@@ -108,8 +108,10 @@ public sealed class MetaOAuthController(
             if (longLivedToken is null || string.IsNullOrWhiteSpace(longLivedToken.AccessToken))
                 return BadRequest(new { message = "Meta returned an invalid long-lived token response." });
 
-            var profileUrl = $"https://graph.facebook.com/{_options.GraphApiVersion}/me?fields=id,name&access_token={Uri.EscapeDataString(tokenPayload.AccessToken)}";
-            using var profileResponse = await client.GetAsync(profileUrl, cancellationToken);
+            var profileUrl = $"https://graph.facebook.com/{_options.GraphApiVersion}/me?fields=id,name";
+            using var profileRequest = new HttpRequestMessage(HttpMethod.Get, profileUrl);
+            profileRequest.Headers.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", longLivedToken.AccessToken);
+            using var profileResponse = await client.SendAsync(profileRequest, cancellationToken);
             if (!profileResponse.IsSuccessStatusCode)
             {
                 logger.LogWarning("Meta profile lookup failed with status {StatusCode}.", profileResponse.StatusCode);
