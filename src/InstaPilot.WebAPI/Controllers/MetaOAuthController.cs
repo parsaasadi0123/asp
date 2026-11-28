@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using System.Text.Json.Serialization;
 using System.Text.Json;
 using InstaPilot.Domain.Meta;
 using InstaPilot.Domain.Workspaces;
@@ -91,6 +92,22 @@ public sealed class MetaOAuthController(
             if (tokenPayload is null || string.IsNullOrWhiteSpace(tokenPayload.AccessToken))
                 return BadRequest(new { message = "Meta returned an invalid token response." });
 
+            // Exchange the short-lived user token for a long-lived token before persisting it.
+            var longLivedUrl = $"https://graph.facebook.com/{_options.GraphApiVersion}/oauth/access_token" +
+                $"?grant_type=fb_exchange_token" +
+                $"&client_id={Uri.EscapeDataString(_options.AppId)}" +
+                $"&client_secret={Uri.EscapeDataString(_options.AppSecret)}" +
+                $"&fb_exchange_token={Uri.EscapeDataString(tokenPayload.AccessToken)}";
+            using var longLivedResponse = await client.GetAsync(longLivedUrl, cancellationToken);
+            if (!longLivedResponse.IsSuccessStatusCode)
+            {
+                logger.LogWarning("Meta long-lived token exchange failed with status {StatusCode}.", longLivedResponse.StatusCode);
+                return BadRequest(new { message = "Meta could not issue a long-lived access token." });
+            }
+            var longLivedToken = await longLivedResponse.Content.ReadFromJsonAsync<MetaTokenPayload>(cancellationToken: cancellationToken);
+            if (longLivedToken is null || string.IsNullOrWhiteSpace(longLivedToken.AccessToken))
+                return BadRequest(new { message = "Meta returned an invalid long-lived token response." });
+
             var profileUrl = $"https://graph.facebook.com/{_options.GraphApiVersion}/me?fields=id,name&access_token={Uri.EscapeDataString(tokenPayload.AccessToken)}";
             using var profileResponse = await client.GetAsync(profileUrl, cancellationToken);
             if (!profileResponse.IsSuccessStatusCode)
@@ -102,8 +119,8 @@ public sealed class MetaOAuthController(
             if (profile is null || string.IsNullOrWhiteSpace(profile.Id))
                 return BadRequest(new { message = "Meta profile response is incomplete." });
 
-            var protectedToken = _tokenProtector.Protect(tokenPayload.AccessToken);
-            var expiry = tokenPayload.ExpiresIn > 0 ? now.AddSeconds(tokenPayload.ExpiresIn) : (DateTime?)null;
+            var protectedToken = _tokenProtector.Protect(longLivedToken.AccessToken);
+            var expiry = longLivedToken.ExpiresIn > 0 ? now.AddSeconds(longLivedToken.ExpiresIn) : (DateTime?)null;
             var existing = await db.MetaAccounts.SingleOrDefaultAsync(
                 x => x.WorkspaceId == oauthState.WorkspaceId && x.MetaUserId == profile.Id, cancellationToken);
             if (existing is null)
@@ -167,6 +184,8 @@ public sealed class MetaOAuthController(
         return Guid.TryParse(value, out var id) ? id : throw new UnauthorizedAccessException();
     }
 
-    private sealed record MetaTokenPayload(string AccessToken, int ExpiresIn);
+    private sealed record MetaTokenPayload(
+        [property: JsonPropertyName("access_token")] string AccessToken,
+        [property: JsonPropertyName("expires_in")] int ExpiresIn);
     private sealed record MetaProfilePayload(string Id, string? Name);
 }
