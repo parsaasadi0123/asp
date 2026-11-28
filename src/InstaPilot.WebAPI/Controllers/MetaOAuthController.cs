@@ -173,7 +173,7 @@ public sealed class MetaOAuthController(
         var account = await db.MetaAccounts.SingleOrDefaultAsync(
             x => x.Id == accountId && x.WorkspaceId == workspaceId, cancellationToken);
         if (account is null) return NotFound();
-        account.SoftDelete(DateTime.UtcNow);
+        db.MetaAccounts.Remove(account);
         await db.SaveChangesAsync(cancellationToken);
         return NoContent();
     }
