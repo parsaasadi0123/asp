@@ -25,11 +25,18 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
     {
         _connection.Open();
         builder.UseEnvironment("Testing");
+        builder.UseSetting("ConnectionStrings:DefaultConnection", "Data Source=integration-test-placeholder.db");
+        builder.UseSetting("Jwt:Issuer", "InstaPilot.Tests");
+        builder.UseSetting("Jwt:Audience", "InstaPilot.Tests.Clients");
+        builder.UseSetting("Jwt:SigningKey", "integration-test-signing-key-at-least-32-bytes-long");
+        builder.UseSetting("Jwt:AccessTokenMinutes", "15");
+        builder.UseSetting("Jwt:RefreshTokenDays", "30");
+        builder.UseSetting("Cors:AllowedOrigins:0", "http://localhost:3000");
         builder.ConfigureAppConfiguration((_, config) =>
         {
             config.AddInMemoryCollection(new Dictionary<string, string?>
             {
-                ["ConnectionStrings:DefaultConnection"] = "Data Source=ignored.db",
+                ["ConnectionStrings:DefaultConnection"] = "Data Source=integration-test-placeholder.db",
                 ["Jwt:Issuer"] = "InstaPilot.Tests",
                 ["Jwt:Audience"] = "InstaPilot.Tests.Clients",
                 ["Jwt:SigningKey"] = "integration-test-signing-key-at-least-32-bytes-long",
