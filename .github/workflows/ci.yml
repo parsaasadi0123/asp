@@ -4,9 +4,9 @@ concurrency:
   cancel-in-progress: true
 on:
   push:
-    branches: [ main ]
+    branches: [ main, phase-1-foundation ]
   pull_request:
-    branches: [ main ]
+    branches: [ main, phase-1-foundation ]
 jobs:
   backend:
     runs-on: windows-latest

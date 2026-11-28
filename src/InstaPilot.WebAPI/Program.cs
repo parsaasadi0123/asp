@@ -35,6 +35,9 @@ else
     });
 }
 builder.Services.AddControllers();
+builder.Services.AddDataProtection();
+builder.Services.Configure<MetaOAuthOptions>(builder.Configuration.GetSection(MetaOAuthOptions.SectionName));
+builder.Services.AddHttpClient("MetaGraph", client => client.Timeout = TimeSpan.FromSeconds(20));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddHealthChecks();

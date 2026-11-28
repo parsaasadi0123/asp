@@ -1,5 +1,6 @@
 using InstaPilot.Application.Abstractions;
 using InstaPilot.Domain.Workspaces;
+using InstaPilot.Domain.Meta;
 using InstaPilot.Infrastructure.Identity;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
@@ -13,6 +14,8 @@ public sealed class InstaPilotDbContext(DbContextOptions<InstaPilotDbContext> op
     public DbSet<Workspace> Workspaces => Set<Workspace>();
     public DbSet<WorkspaceMembership> WorkspaceMemberships => Set<WorkspaceMembership>();
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+    public DbSet<MetaAccount> MetaAccounts => Set<MetaAccount>();
+    public DbSet<MetaOAuthState> MetaOAuthStates => Set<MetaOAuthState>();
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

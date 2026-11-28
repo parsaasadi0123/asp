@@ -140,6 +140,11 @@ public sealed class AuthenticationAndWorkspaceFlowTests(ApiFactory factory) : IC
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", memberTokens.AccessToken);
         var memberWorkspaces = await client.GetFromJsonAsync<WorkspaceResult[]>("/api/v1/workspaces");
         Assert.Single(memberWorkspaces!);
+        var dashboard = await client.GetFromJsonAsync<DashboardResult>($"/api/v1/workspaces/{workspace.Id}/dashboard");
+        Assert.NotNull(dashboard);
+        Assert.Equal(2, dashboard.MemberCount);
+        Assert.Equal(1, dashboard.OwnerCount);
+        Assert.Equal(0, dashboard.ConnectedMetaAccounts);
 
         const string strangerPhone = "+989121234503";
         var strangerRegistration = await client.PostAsJsonAsync("/api/v1/auth/register",
@@ -157,9 +162,12 @@ public sealed class AuthenticationAndWorkspaceFlowTests(ApiFactory factory) : IC
         client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", strangerTokens.AccessToken);
         var strangerWorkspaces = await client.GetFromJsonAsync<WorkspaceResult[]>("/api/v1/workspaces");
         Assert.Empty(strangerWorkspaces!);
+        var strangerDashboard = await client.GetAsync($"/api/v1/workspaces/{workspace.Id}/dashboard");
+        Assert.Equal(HttpStatusCode.NotFound, strangerDashboard.StatusCode);
     }
 
     private sealed record UserCreated(Guid UserId);
     private sealed record TokenResult(string AccessToken, string RefreshToken);
     private sealed record WorkspaceResult(Guid Id, string Name, string Slug, string Role, DateTime CreatedAtUtc);
+    private sealed record DashboardResult(Guid WorkspaceId, string WorkspaceName, string CurrentUserRole, int MemberCount, int OwnerCount, int AdminCount, int ContentManagerCount, int EditorCount, int AnalystCount, int ConnectedMetaAccounts);
 }
